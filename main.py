@@ -5,7 +5,7 @@ import time
 class InstagramBot:
 
     #CONSTRUCTOR
-    def __init__(self, username, password): 
+    def __init__(self, username, password):
         #/////////////////////////////////////////////////////////////////////////////////////////////////////
         """
         Initializes an instance of the InstagramBot class.
@@ -39,6 +39,8 @@ class InstagramBot:
     #NAVIGATE TO WEBSITE
     def nav_user(self, user):
         self.driver.get('{}/{}/'.format(self.base_url, user))
+
+    #TODO: Follow    
 
 
 #MAIN
