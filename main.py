@@ -57,14 +57,19 @@ class InstagramBot:
     #LIKE HASHTAG 
     #-- like "count" images of hashtag
     def like_hashtag(self, hashtag, count):
-        self.nav_hashtag(hashtag)
+        self.nav_hashtag(hashtag)   #navigate to hashtag page
         
-        self.driver.find_elements_by_class_name('_9AhH0')[9].click()
+        self.driver.find_elements_by_class_name('_9AhH0')[9].click() #open the most recent photo, 10th photo on the hashtag page
 
-        for x in range(count):
-            time.sleep(random.randrange(3,10))
-            self.driver.find_element_by_xpath("//*[@aria-label='{}']".format('Like')).click() #click on the like button
-            self.driver.find_element_by_xpath("//a[contains(text(), 'Next')]").click()
+        for x in range(count): #loop liking count photos
+            time.sleep(random.randrange(3,7)) 
+            try:
+                self.driver.find_element_by_xpath("/html/body/div[4]/div[2]/div/article/div[2]/section[1]/span[1]/button").click() #click on the like button
+                print(x+1, "pictures liked")
+            except:
+                print("Like button not found skipping photo")
+                
+            self.driver.find_element_by_xpath("//a[contains(text(), 'Next')]").click() #click on the next arrow
         
 
 
@@ -73,13 +78,25 @@ class InstagramBot:
 if __name__ == '__main__':
 
     username = 'username'
-    password = 'pass'
+    password = 'passwd'
 
-    ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters
+    ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters Login to account
 
-    #ig_bot.nav_user('samuel_stolicny')
-    #ig_bot.nav_hashtag('dnescestujem')
-    ig_bot.like_hashtag('dnescestujem', 3)
+    #INFINITE LOOP FOR PROGRAM
+    # liking random pictures of hashtag
+    # sleeping for random time interval
+    while True:
+        like_count = int(random.normalvariate(5, 5))
+        sleep_time = int(random.normalvariate(30, 10))
+        print("Like count: ", like_count)
+        print("Sleep time: ", sleep_time)
+        ig_bot.like_hashtag('likeforfollow', like_count)
+        print("Waiting for ", sleep_time, " seconds")
+        time.sleep(sleep_time)
+
+
+
+    
     #ig_bot.follow_user('adobe')
 
 
