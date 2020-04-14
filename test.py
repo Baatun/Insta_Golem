@@ -4,9 +4,7 @@ import time
 import random
 import configparser
 import ast
-import logging
 import datetime
-
 
 class InstagramBot:
 
@@ -72,60 +70,15 @@ class InstagramBot:
                 print(x+1, "posts liked")
             except:
                 print("Like button not found skipping photo")
-                x-=1
                 
             self.driver.find_element_by_xpath("//a[contains(text(), 'Next')]").click() #click on the next arrow
-
-        logger.info("Round liked: %d posts", x)
         
 
-#LOGGER CONFIG
-logging.basicConfig(filename="test.log", format='%(asctime)s %(message)s')
-logger=logging.getLogger()
-logger.setLevel(logging.INFO)
+
 
 #MAIN
 if __name__ == '__main__':
 
-    #CONFIGPARSER CONFIG
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
-    username = config.get("login","username")
-    password = config.get("login","password")
-
-    ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters Login to account
-    logger.info("Logged user: %s", username)
-
-    #INFINITE LOOP FOR PROGRAM
-    # parameters are from "config.ini" file
-    # liking random pictures of hashtag
-    # sleeping for random time interval
-    # randomly picking hashtag from list
-    while True:
-
-        time_start = time.strptime(config.get("general", "time_start"), '%H:%M').tm_hour
-        time_end = time.strptime(config.get("general", "time_end"), '%H:%M').tm_hour
-        local_time = time.localtime().tm_hour
-
-        if ((time_start <= local_time) and (local_time <= time_end)):
-            #PREPARATION PROCESS
-            like_count = int(random.normalvariate(config.getint("like","like_count"), 5)) #generating number of likes
-            sleep_time = int(random.normalvariate(config.getint("like","sleep_timer"), 10)) #generating number of sleep seconds
-            hashtag = random.choice(ast.literal_eval(config.get("like", "hashtags"))) #randomly picking hashtag from list 
-            print("Like count: ", like_count)
-            logger.info("Like count: %d", like_count)
-            print("Sleep time: ", sleep_time)
-            logger.info("Sleep time: %d", sleep_time)
-            print("Liking hashtag: ", hashtag)
-            logger.info("Liking hashtag: %s", hashtag)
-            
-            #LIKING PROCESS       
-            ig_bot.like_hashtag(hashtag, like_count)
-            print("Waiting for ", sleep_time, " seconds till", datetime.timedelta(seconds=sleep_time))
-            logger.info("Waiting for %d seconds till %s", sleep_time, str(datetime.timedelta(seconds=sleep_time)))
-            time.sleep(sleep_time)
-        else:
-            pass
-
+    print(datetime.datetime.now())
+    print(datetime.datetime.now() + datetime.timedelta(seconds=20))
     print('SUCCESS')
