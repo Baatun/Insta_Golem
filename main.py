@@ -14,6 +14,7 @@ class InstagramBot:
     def __init__(self, username, password):
         #/////////////////////////////////////////////////////////////////////////////////////////////////////
         """
+        Not complete
         Initializes an instance of the InstagramBot class.
         Call the login method to authenticate a user with Instagram.
 
