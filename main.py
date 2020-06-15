@@ -28,11 +28,13 @@ class InstagramBot:
         self.username = username
         self.password = password
         self.base_url = "https://www.instagram.com"
+        
+        #OPENING CHROME HEADLESS
+        #options = webdriver.ChromeOptions()
+        #options.add_argument('headless') #if you want to see chrome opening, just comment this line
+        #self.driver = webdriver.Chrome('./chromedriver.exe', chrome_options=options)
         self.driver = webdriver.Chrome('./chromedriver.exe')
-
         self.login()
-
-    
         
     #LOGIN
     def login(self):
@@ -51,6 +53,10 @@ class InstagramBot:
     def nav_hashtag(self, hashtag):
         self.driver.get('{}/explore/tags/{}/'.format(self.base_url, hashtag))
 
+    #NAVIGATE TO EXPLORE 
+    def nav_explore(self):
+        self.driver.get('{}/explore/'.format(self.base_url))
+
     #FOLLOW USER
     def follow_user(self, user):
         self.nav_user(user) 
@@ -61,26 +67,44 @@ class InstagramBot:
     #LIKE HASHTAG 
     #-- like "count" images of hashtag
     def like_hashtag(self, hashtag, count):
-        self.nav_hashtag(hashtag)   #navigate to hashtag page
-        
-        self.driver.find_elements_by_class_name('_9AhH0')[9].click() #open the most recent photo, 10th photo on the hashtag page
+        liked_posts_in_round = 0
+
+        #generating random chance that chooses to like hashtags or photos on explore tab
+        if (random.random() < 0.8):
+            print("Liking hashtag: ", hashtag)
+            logger.info("Liking hashtag: %s", hashtag)
+            self.nav_hashtag(hashtag)   #navigate to hashtag page
+            time.sleep(random.randrange(2,5))
+            self.driver.find_elements_by_class_name('_9AhH0')[9].click() #open the most recent photo, 10th photo on the hashtag page
+        else:
+            print("Liking explore page")
+            logger.info("Liking explore page")
+            self.nav_explore() #navigate to explore
+            time.sleep(random.randrange(2,5))
+            self.driver.find_elements_by_class_name('_9AhH0')[random.randint(1,10)].click() #open random photo on page from range
 
         for x in range(count): #loop liking count photos
-            time.sleep(random.randrange(3,7)) 
+
+            time.sleep(random.randrange(3,7))  #sleep random range seconds between liking posts
             try:
-                self.driver.find_element_by_xpath("/html/body/div[4]/div[2]/div/article/div[2]/section[1]/span[1]/button").click() #click on the like button
-                print(x+1, "posts liked")
+                if (random.random() < 0.8): #random chance for liking displayed post
+                    self.driver.find_element_by_xpath("/html/body/div[4]/div[2]/div/article/div[2]/section[1]/span[1]/button").click() #click on the like button
+                    liked_posts_in_round += 1
+                    print("Liked post number: ", x+1, "|", liked_posts_in_round, "posts liked")
+                else:
+                    print("post skipped")
             except:
                 print("Like button not found skipping photo")
+                logger.info("Like button not found skipping photo")
                 x-=1
                 
             self.driver.find_element_by_xpath("//a[contains(text(), 'Next')]").click() #click on the next arrow
 
-        logger.info("Round liked: %d posts", x)
+        logger.info("Round liked: %d posts", liked_posts_in_round)
         
 
 #LOGGER CONFIG
-logging.basicConfig(filename="test.log", format='%(asctime)s %(message)s')
+logging.basicConfig(filename="logs.log", format='%(asctime)s %(message)s')
 logger=logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -94,15 +118,14 @@ if __name__ == '__main__':
     username = config.get("login","username")
     password = config.get("login","password")
 
-    ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters Login to account
-    logger.info("Logged user: %s", username)
-
     #INFINITE LOOP FOR PROGRAM
     # parameters are from "config.ini" file
     # liking random pictures of hashtag
     # sleeping for random time interval
     # randomly picking hashtag from list
     while True:
+        ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters Login to account
+        logger.info("Logged user: %s", username)
 
         time_start = time.strptime(config.get("general", "time_start"), '%H:%M').tm_hour
         time_end = time.strptime(config.get("general", "time_end"), '%H:%M').tm_hour
@@ -110,21 +133,27 @@ if __name__ == '__main__':
 
         if ((time_start <= local_time) and (local_time <= time_end)):
             #PREPARATION PROCESS
-            like_count = int(random.normalvariate(config.getint("like","like_count"), 5)) #generating number of likes
-            sleep_time = int(random.normalvariate(config.getint("like","sleep_timer"), 10)) #generating number of sleep seconds
+            #like_count = int(random.normalvariate(config.getint("like","like_count"), 5)) #generating number of likes
+            like_count = 2
+            #sleep_time = int(random.normalvariate(config.getint("like","sleep_timer"), 10)) #generating number of sleep seconds
+            sleep_time = 10
             hashtag = random.choice(ast.literal_eval(config.get("like", "hashtags"))) #randomly picking hashtag from list 
             print("Like count: ", like_count)
             logger.info("Like count: %d", like_count)
             print("Sleep time: ", sleep_time)
             logger.info("Sleep time: %d", sleep_time)
-            print("Liking hashtag: ", hashtag)
-            logger.info("Liking hashtag: %s", hashtag)
+            
             
             #LIKING PROCESS       
             ig_bot.like_hashtag(hashtag, like_count)
-            print("Waiting for ", sleep_time, " seconds till", datetime.timedelta(seconds=sleep_time))
-            logger.info("Waiting for %d seconds till %s", sleep_time, str(datetime.timedelta(seconds=sleep_time)))
-            time.sleep(sleep_time)
+            
+            time_of_new_round = datetime.datetime.now() + datetime.timedelta(seconds=sleep_time)
+            print("Waiting for ", sleep_time, " seconds till", time_of_new_round) #print time of new round
+            logger.info("Waiting for %d seconds till %s", sleep_time, str(time_of_new_round))
+
+            ig_bot.driver.quit() #closing chrome 
+            del ig_bot #deleting instance of Instagram bot
+            time.sleep(sleep_time) #bot is sleeping until start of a next round
         else:
             pass
 
