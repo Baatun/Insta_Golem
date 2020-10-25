@@ -34,17 +34,19 @@ class InstagramBot:
         #options = webdriver.ChromeOptions()
         #options.add_argument('headless') #if you want to see chrome opening, just comment this line
         #self.driver = webdriver.Chrome('./chromedriver.exe', chrome_options=options)
-        self.driver = webdriver.Chrome('./chromedriver.exe')
+        self.driver = webdriver.Chrome('./chromedriver')
         self.login()
         
     #LOGIN
     def login(self):
         self.driver.get('{}/accounts/login/'.format(self.base_url))
         self.driver.implicitly_wait(5) #wait 5 second after loading the page, there was a problem when driven.find was faster and never found the element
-        self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/article/div/div[1]/div/form/div[2]/div/label/input').send_keys(self.username) #finds element in html by Xpath and paste there username
-        self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/article/div/div[1]/div/form/div[3]/div/label/input').send_keys(self.password)
-        self.driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/article/div/div[1]/div/form/div[4]/button').click()
+        self.driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div[2]/button[1]').click()
+        self.driver.find_element_by_xpath('//*[@id="loginForm"]/div/div[1]/div/label/input').send_keys(self.username)
+        self.driver.find_element_by_xpath('//*[@id="loginForm"]/div/div[2]/div/label/input').send_keys(self.password)
+        self.driver.find_element_by_xpath('//*[@id="loginForm"]/div/div[3]/button/div').click()
         time.sleep(5)
+        
 
     #NAVIGATE TO USER
     def nav_user(self, user):
@@ -125,14 +127,14 @@ if __name__ == '__main__':
     # sleeping for random time interval
     # randomly picking hashtag from list
     while True:
-        ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters Login to account
-        logger.info("Logged user: %s", username)
-
+        
         time_start = time.strptime(config.get("general", "time_start"), '%H:%M').tm_hour
         time_end = time.strptime(config.get("general", "time_end"), '%H:%M').tm_hour
         local_time = time.localtime().tm_hour
 
         if ((time_start <= local_time) and (local_time <= time_end)):
+            ig_bot = InstagramBot(username, password) #creating class InstagramBot with username and password parameters Login to account
+            logger.info("Logged user: %s", username)
             #PREPARATION PROCESS
             #like_count = int(random.normalvariate(config.getint("like","like_count"), 5)) #generating number of likes
             like_count = 2
